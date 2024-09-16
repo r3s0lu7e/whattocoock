@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>What Should I Cook?</title>
+		<style>
+						@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+						:root {
+						    --bg-color: #f7f7f7;
+						    --text-color: #333;
+						    --primary-color: #3498db;
+						    --secondary-color: #2c3e50;
+						    --card-bg-color: #fff;
+						}
+
+						.dark-theme {
+						    --bg-color: #1a1a1a;
+						    --text-color: #e0e0e0;
+						    --primary-color: #4a90e2;
+						    --secondary-color: #bdc3c7;
+						    --card-bg-color: #2a2a2a;
+						}
+
+						body {
+						    font-family: 'Poppins', sans-serif;
+						    max-width: 1200px;
+						    margin: 0 auto;
+						    padding: 40px 20px;
+						    background-color: var(--bg-color);
+						    color: var(--text-color);
+						    transition: background-color 0.3s, color 0.3s;
+						}
+
+						h1, h2, h3 {
+						    color: var(--primary-color);
+						    text-align: center;
+						}
+
+						h1 { font-size: 3em; margin-bottom: 30px; }
+						h2 { font-size: 2em; margin-top: 20px; }
+						h3 { font-size: 1.5em; margin-top: 15px; }
+
+						#recipeList {
+						    list-style-type: none;
+						    padding: 0;
+						    display: grid;
+						    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+						    gap: 20px;
+						}
+
+						#recipeList li {
+						    background-color: var(--card-bg-color);
+						    padding: 20px;
+						    border-radius: 12px;
+						    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+						    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s;
+						    cursor: pointer;
+						    text-align: center;
+						    position: relative;
+						}
+
+						#recipeList li:hover {
+						    transform: translateY(-5px);
+						    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+						}
+
+						.recipe-image-preview {
+						    display: none;
+						    position: absolute;
+						    top: -260px;
+						    left: 50%;
+						    transform: translateX(-50%);
+						    width: 300px;
+						    height: 250px;
+						    object-fit: cover;
+						    border-radius: 8px;
+						    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+						    z-index: 10;
+						}
+
+						#recipeList li:hover .recipe-image-preview {
+						    display: block;
+						}
+
+						#searchButton, #randomButton, #moreInfoButton, #getMoreInfoButton, #showMoreButton {
+						    background-color: var(--primary-color);
+						    border: none;
+						    color: white;
+						    padding: 15px 32px;
+						    text-align: center;
+						    text-decoration: none;
+						    display: inline-block;
+						    font-size: 18px;
+						    margin: 10px;
+						    cursor: pointer;
+						    border-radius: 50px;
+						    transition: background-color 0.3s ease, transform 0.2s ease;
+						    font-weight: 600;
+						}
+
+						#searchButton:hover, #randomButton:hover, #moreInfoButton:hover, #getMoreInfoButton:hover, #showMoreButton:hover {
+						    background-color: #3a7bbf;
+						    transform: scale(1.05);
+						}
+
+						#recipeDetails {
+						    background-color: var(--card-bg-color);
+						    border-radius: 12px;
+						    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+						    padding: 30px;
+						    margin-top: 30px;
+						    transition: background-color 0.3s;
+						}
+
+						#recipeDetails h3 {
+						    color: var(--primary-color);
+						    border-bottom: 2px solid var(--primary-color);
+						    padding-bottom: 10px;
+						    text-align: left;
+						}
+
+						#ingredients, #instructions {
+						    padding-left: 20px;
+						}
+
+						#ingredients li, #instructions li {
+						    margin-bottom: 10px;
+						}
+
+						#searchInput {
+						    width: 70%;
+						    padding: 15px;
+						    font-size: 16px;
+						    border: none;
+						    border-radius: 25px;
+						    background-color: var(--card-bg-color);
+						    color: var(--text-color);
+						    transition: box-shadow 0.3s ease, background-color 0.3s, color 0.3s;
+						}
+
+						#searchInput:focus {
+						    outline: none;
+						    box-shadow: 0 0 0 2px var(--primary-color);
+						}
+
+						.button-container {
+						    text-align: center;
+						    margin-top: 20px;
+						}
+
+						#recipeImage {
+						    max-width: 100%;
+						    height: auto;
+						    border-radius: 12px;
+						    margin-bottom: 20px;
+						    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+						}
+
+						.cuisine-type {
+						    font-style: italic;
+						    color: var(--secondary-color);
+						    text-align: center;
+						    margin-bottom: 15px;
+						}
+
+						a {
+						    color: var(--primary-color);
+						    text-decoration: none;
+						    transition: color 0.3s ease;
+						}
+
+						a:hover {
+						    color: #3a7bbf;
+						}
+			/* TEXT BUTTON FOR THEME */
+						/* #themeToggle {
+						    position: fixed;
+						    top: 20px;
+						    right: 20px;
+						    background-color: var(--primary-color);
+						    color: white;
+						    border: none;
+						    padding: 10px 20px;
+						    border-radius: 25px;
+						    cursor: pointer;
+						    font-size: 16px;
+						    transition: background-color 0.3s ease;
+						}
+
+						#themeToggle:hover {
+						    background-color: #3a7bbf;
+						} */
+						 /* TEXT BUTTON FOR THEME */
+
+
+						/* FOR THE SVG ICON */
+					#themeToggle {
+			            position: fixed;
+			            top: 20px;
+			            right: 20px;
+			            background-color: transparent;
+			            border: none;
+			            cursor: pointer;
+			            padding: 0;
+			            width: 40px;
+			            height: 40px;
+			        }
+
+			        #themeToggle svg {
+			            width: 100%;
+			            height: 100%;
+			            fill: var(--primary-color);
+			            transition: fill 0.3s ease;
+			        }
+
+			        #themeToggle:hover svg {
+			            fill: #3a7bbf;
+			        }
+
+			        .sun-icon, .moon-icon {
+			            display: none;
+			        }
+
+			        body:not(.dark-theme) .sun-icon,
+			        body.dark-theme .moon-icon {
+			            display: block;
+			        }
+			/* FOR THE SVG ICON */
+						.spinner {
+						    display: none;
+						    position: fixed;
+						    top: 50%;
+						    left: 50%;
+						    transform: translate(-50%, -50%);
+						    width: 50px;
+						    height: 50px;
+						    border: 5px solid var(--card-bg-color);
+						    border-top: 5px solid var(--primary-color);
+						    border-radius: 50%;
+						    animation: spin 1s linear infinite;
+						    z-index: 1000;
+						}
+
+						@keyframes spin {
+						    0% { transform: translate(-50%, -50%) rotate(0deg); }
+						    100% { transform: translate(-50%, -50%) rotate(360deg); }
+						}
+
+						.overlay {
+						    display: none;
+						    position: fixed;
+						    top: 0;
+						    left: 0;
+						    width: 100%;
+						    height: 100%;
+						    background-color: rgba(0, 0, 0, 0.5);
+						    z-index: 999;
+						}
+		</style>
+	</head>
+	<body>
+		<!-- <button id="themeToggle">Toggle Theme</button> -->
+		<button id="themeToggle" aria-label="Toggle theme">
+			<svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+				<path
+					d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z"
+				/>
+			</svg>
+			<svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+				<path d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" />
+			</svg>
+		</button>
+		<h1>What Should I Cook?</h1>
+		<div class="button-container">
+			<input type="text" id="searchInput" placeholder="Enter an ingredient or dish" />
+			<button id="searchButton">Search Recipes</button>
+			<button id="randomButton">Random Recipe</button>
+		</div>
+		<ul id="recipeList"></ul>
+		<div id="recipeDetails"></div>
+
+		<div class="overlay" id="overlay"></div>
+		<div class="spinner" id="spinner"></div>
+
+		<script>
+				const API_KEY = '2a703996a0d0468893d58d65cf5dc6e1';
+
+				const searchInput = document.getElementById('searchInput');
+				const searchButton = document.getElementById('searchButton');
+				const randomButton = document.getElementById('randomButton');
+				const recipeList = document.getElementById('recipeList');
+				const recipeDetails = document.getElementById('recipeDetails');
+				const themeToggle = document.getElementById('themeToggle');
+				const spinner = document.getElementById('spinner');
+				const overlay = document.getElementById('overlay');
+
+				let currentPage = 1;
+				let currentQuery = '';
+				let totalResults = 0;
+				const resultsPerPage = 100;
+
+				function showSpinner() {
+				    spinner.style.display = 'block';
+				    overlay.style.display = 'block';
+				}
+
+				function hideSpinner() {
+				    spinner.style.display = 'none';
+				    overlay.style.display = 'none';
+				}
+
+				async function fetchRecipes(query, page = 1) {
+				    showSpinner();
+				    try {
+				        const response = await fetch(`https://api.spoonacular.com/recipes/complexSearch?apiKey=${API_KEY}&query=${query}&number=${resultsPerPage}&offset=${(page - 1) * resultsPerPage}&addRecipeInformation=true&instructionsRequired=true`);
+				        const data = await response.json();
+				        totalResults = data.totalResults;
+				        return data.results;
+				    } catch (error) {
+				        console.error('Error fetching recipes:', error);
+				        return [];
+				    } finally {
+				        hideSpinner();
+				    }
+				}
+
+				function displayRecipes(recipes, append = false) {
+				    if (!append) {
+				        recipeList.innerHTML = '';
+				    }
+				    recipes.forEach(recipe => {
+				        const li = document.createElement('li');
+				        li.textContent = recipe.title;
+
+				        const img = document.createElement('img');
+				        img.src = recipe.image;
+				        img.alt = recipe.title;
+				        img.className = 'recipe-image-preview';
+				        li.appendChild(img);
+
+				        li.addEventListener('click', () => {
+				            displayRecipeDetails(recipe);
+				            recipeDetails.scrollIntoView({ behavior: 'smooth' });
+				        });
+				        recipeList.appendChild(li);
+				    });
+
+				    const existingShowMoreButton = document.getElementById('showMoreButton');
+				    if (existingShowMoreButton) {
+				        existingShowMoreButton.remove();
+				    }
+
+				    if (totalResults > currentPage * resultsPerPage) {
+				        const showMoreButton = document.createElement('button');
+				        showMoreButton.id = 'showMoreButton';
+				        showMoreButton.textContent = 'Show More Recipes';
+				        showMoreButton.addEventListener('click', loadMoreRecipes);
+				        recipeList.after(showMoreButton);
+				    }
+				}
+
+				async function loadMoreRecipes() {
+				    currentPage++;
+				    const newRecipes = await fetchRecipes(currentQuery, currentPage);
+				    displayRecipes(newRecipes, true);
+				}
+
+				function displayRecipeDetails(recipe) {
+				    const cuisineType = recipe.cuisines && recipe.cuisines.length > 0 ? recipe.cuisines.join(', ') : 'Not specified';
+				    let ingredientsHtml = '';
+
+				    if (recipe.extendedIngredients && recipe.extendedIngredients.length > 0) {
+				        ingredientsHtml = `
+				            <ul id="ingredients">
+				                ${recipe.extendedIngredients.map(ingredient => `<li>${ingredient.original}</li>`).join('')}
+				            </ul>
+				        `;
+				    } else {
+				        ingredientsHtml = `
+				            <p>No ingredients information available.</p>
+				            <button id="getMoreInfoButton">Get information if available</button>
+				        `;
+				    }
+
+				    let html = `
+				        <h2>${recipe.title}</h2>
+				        <p class="cuisine-type">Cuisine Type: ${cuisineType}</p>
+				        <img id="recipeImage" src="${recipe.image}" alt="${recipe.title}">
+				        <h3>Ingredients:</h3>
+				        <div id="ingredientsContainer">
+				            ${ingredientsHtml}
+				        </div>
+				        <h3>Summary:</h3>
+				        <p>${recipe.summary || 'No summary available.'}</p>
+				        <button id="moreInfoButton">Instructions</button>
+				        <div id="detailedInstructions" style="display:none;">
+				            <h3>Detailed Instructions:</h3>
+				            ${getDetailedInstructions(recipe)}
+				        </div>
+				    `;
+				    recipeDetails.innerHTML = html;
+
+				    document.getElementById('moreInfoButton').addEventListener('click', toggleDetailedInstructions);
+
+				    const getMoreInfoButton = document.getElementById('getMoreInfoButton');
+				    if (getMoreInfoButton) {
+				        getMoreInfoButton.addEventListener('click', () => fetchDetailedRecipeInfo(recipe.id));
+				    }
+				}
+
+				function getDetailedInstructions(recipe) {
+				    if (recipe.analyzedInstructions && recipe.analyzedInstructions.length > 0) {
+				        const steps = recipe.analyzedInstructions[0].steps;
+				        return `
+				            <ol>
+				                ${steps.map(step => `<li>${step.step}</li>`).join('')}
+				            </ol>
+				        `;
+				    } else {
+				        return '<p>No detailed instructions available.</p>';
+				    }
+				}
+
+				function toggleDetailedInstructions() {
+				    const detailedInstructions = document.getElementById('detailedInstructions');
+				    const moreInfoButton = document.getElementById('moreInfoButton');
+				    if (detailedInstructions.style.display === 'none') {
+				        detailedInstructions.style.display = 'block';
+				        moreInfoButton.textContent = 'Less Info';
+				    } else {
+				        detailedInstructions.style.display = 'none';
+				        moreInfoButton.textContent = 'More Info';
+				    }
+				}
+
+				async function fetchDetailedRecipeInfo(recipeId) {
+				    showSpinner();
+				    try {
+				        const response = await fetch(`https://api.spoonacular.com/recipes/${recipeId}/information?apiKey=${API_KEY}`);
+				        const detailedRecipe = await response.json();
+				        updateIngredients(detailedRecipe);
+				    } catch (error) {
+				        console.error('Error fetching detailed recipe information:', error);
+				        alert('Failed to fetch more information. Please try again later.');
+				    } finally {
+				        hideSpinner();
+				    }
+				}
+
+				function updateIngredients(detailedRecipe) {
+				    const ingredientsContainer = document.getElementById('ingredientsContainer');
+				    if (detailedRecipe.extendedIngredients && detailedRecipe.extendedIngredients.length > 0) {
+				        const ingredientsHtml = `
+				            <ul id="ingredients">
+				                ${detailedRecipe.extendedIngredients.map(ingredient => `<li>${ingredient.original}</li>`).join('')}
+				            </ul>
+				        `;
+				        ingredientsContainer.innerHTML = ingredientsHtml;
+				    } else {
+				        ingredientsContainer.innerHTML = '<p>No ingredients information available.</p>';
+				    }
+				}
+
+				searchButton.addEventListener('click', async () => {
+				    currentQuery = searchInput.value;
+				    currentPage = 1;
+				    if (currentQuery) {
+				        const recipes = await fetchRecipes(currentQuery);
+				        displayRecipes(recipes);
+				    }
+				});
+
+				searchInput.addEventListener('keydown', async (event) => {
+				    if (event.key === 'Enter') {
+				        currentQuery = searchInput.value;
+				        currentPage = 1;
+				        if (currentQuery) {
+				            const recipes = await fetchRecipes(currentQuery);
+				            displayRecipes(recipes);
+				        }
+				    }
+				});
+
+				randomButton.addEventListener('click', async () => {
+				    showSpinner();
+				    try {
+				        const response = await fetch(`https://api.spoonacular.com/recipes/random?apiKey=${API_KEY}&number=1`);
+				        const data = await response.json();
+				        displayRecipeDetails(data.recipes[0]);
+						recipeDetails.scrollIntoView({ behavior: 'smooth' });
+				    } catch (error) {
+				        console.error('Error fetching random recipe:', error);
+				        alert('Failed to fetch a random recipe. Please try again later.');
+				    } finally {
+				        hideSpinner();
+				    }
+				});
+				/* FOR THE SVG ICON */
+			   themeToggle.addEventListener('click', () => {
+			          document.body.classList.toggle('dark-theme');
+			      });
+			/* FOR THE SVG ICON */
+
+			/* TEXT BUTTON FOR THEME */
+				// themeToggle.addEventListener('click', () => {
+				//     document.body.classList.toggle('dark-theme');
+				//     themeToggle.textContent = document.body.classList.contains('dark-theme') ? 'Light Theme' : 'Dark Theme';
+				// });
+
+				// themeToggle.textContent = document.body.classList.contains('dark-theme') ? 'Light Theme' : 'Dark Theme';
+				/* TEXT BUTTON FOR THEME */
+		</script>
+	</body>
+</html>
